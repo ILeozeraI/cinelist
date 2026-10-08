@@ -5,6 +5,8 @@ export type SearchParamsInput = Record<string, string | string[] | undefined>;
 
 export const SORT_OPTIONS: readonly SortOption[] = ["popularidade", "nota", "lancamento"];
 export const MIN_YEAR = 1900;
+/** Tamanho máximo do texto de busca. */
+export const MAX_QUERY_LENGTH = 100;
 /** O TMDB não devolve páginas além da 500. */
 export const MAX_PAGE = 500;
 
@@ -24,7 +26,7 @@ function first(value: string | string[] | undefined): string | undefined {
 function positiveInt(value: string | undefined): number | null {
   if (!value || !/^\d+$/.test(value)) return null;
   const n = Number(value);
-  return n > 0 ? n : null;
+  return Number.isSafeInteger(n) && n > 0 ? n : null;
 }
 
 export function parseFilters(sp: SearchParamsInput, currentYear = new Date().getFullYear()): DiscoverFilters {

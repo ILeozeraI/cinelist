@@ -51,13 +51,13 @@ describe("FiltersPanel", () => {
     await userEvent.selectOptions(screen.getByLabelText("Gênero"), "27");
     expect(replace).toHaveBeenLastCalledWith("/explorar?genero=27", { scroll: false });
     await userEvent.selectOptions(screen.getByLabelText("Ano de"), "2000");
-    expect(replace).toHaveBeenLastCalledWith("/explorar?de=2000", { scroll: false });
+    expect(replace).toHaveBeenLastCalledWith("/explorar?genero=27&de=2000", { scroll: false });
     await userEvent.selectOptions(screen.getByLabelText("Ano até"), "2024");
-    expect(replace).toHaveBeenLastCalledWith("/explorar?ate=2024", { scroll: false });
+    expect(replace).toHaveBeenLastCalledWith("/explorar?genero=27&de=2000&ate=2024", { scroll: false });
     await userEvent.selectOptions(screen.getByLabelText("Nota mínima"), "6.5");
-    expect(replace).toHaveBeenLastCalledWith("/explorar?nota=6.5", { scroll: false });
+    expect(replace).toHaveBeenLastCalledWith("/explorar?genero=27&de=2000&ate=2024&nota=6.5", { scroll: false });
     await userEvent.selectOptions(screen.getByLabelText("Ordenar por"), "nota");
-    expect(replace).toHaveBeenLastCalledWith("/explorar?ordem=nota", { scroll: false });
+    expect(replace).toHaveBeenLastCalledWith("/explorar?genero=27&de=2000&ate=2024&nota=6.5&ordem=nota", { scroll: false });
   });
 
   it("mostra os valores atuais selecionados", () => {
@@ -72,5 +72,18 @@ describe("FiltersPanel", () => {
     renderPanel({ genreId: 27, sort: "nota" });
     await userEvent.click(screen.getByRole("button", { name: "Limpar filtros" }));
     expect(replace).toHaveBeenCalledWith("/explorar", { scroll: false });
+  });
+
+  it("cliques rápidos acumulam streamings mesmo sem o servidor responder", async () => {
+    renderPanel();
+    await userEvent.click(screen.getByRole("button", { name: "Netflix" }));
+    await userEvent.click(screen.getByRole("button", { name: "Amazon Prime Video" }));
+    expect(replace).toHaveBeenLastCalledWith("/explorar?streaming=8%2C119", { scroll: false });
+  });
+
+  it("o gênero escolhido aparece na hora", async () => {
+    renderPanel();
+    await userEvent.selectOptions(screen.getByLabelText("Gênero"), "27");
+    expect(screen.getByLabelText("Gênero")).toHaveValue("27");
   });
 });

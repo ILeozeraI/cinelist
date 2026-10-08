@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { DEFAULT_FILTERS, MIN_YEAR, serializeFilters, SORT_OPTIONS } from "@/lib/filters";
 import { tmdbImage } from "@/lib/format";
 import type { DiscoverFilters, Genre, Provider, SortOption } from "@/lib/tmdb/types";
@@ -23,15 +23,27 @@ const labelClass = "block text-xs font-semibold uppercase tracking-wide text-zin
 
 const toNumberOrNull = (value: string) => (value === "" ? null : Number(value));
 
-export function FiltersPanel({ providers, genres, filters, currentYear }: Props) {
+export function FiltersPanel({ providers, genres, filters: serverFilters, currentYear }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  // Cópia local: cada clique parte do que o usuário já escolheu, sem esperar o servidor responder.
+  // Quando chegam filtros novos do servidor (ou o usuário volta no histórico), a cópia é refeita.
+  const [filters, setFilters] = useState(serverFilters);
+  const [lastServerFilters, setLastServerFilters] = useState(serverFilters);
+  if (serverFilters !== lastServerFilters) {
+    setLastServerFilters(serverFilters);
+    setFilters(serverFilters);
+  }
   const years = Array.from({ length: currentYear + 1 - MIN_YEAR + 1 }, (_, i) => currentYear + 1 - i);
 
   function apply(next: DiscoverFilters) {
     const query = serializeFilters(next);
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    setFilters(next);
+    startTransition(() => {
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    });
   }
 
   function toggleProvider(id: number) {
@@ -43,7 +55,7 @@ export function FiltersPanel({ providers, genres, filters, currentYear }: Props)
   }
 
   return (
-    <aside className="md:w-64 md:shrink-0">
+    <aside aria-busy={isPending} className="md:w-64 md:shrink-0">
       <button
         type="button"
         aria-expanded={open}
@@ -155,6 +167,12 @@ export function FiltersPanel({ providers, genres, filters, currentYear }: Props)
             ))}
           </select>
         </div>
+
+        {isPending && (
+          <p role="status" className="text-xs text-zinc-400">
+            Atualizando…
+          </p>
+        )}
 
         <button type="button" onClick={() => apply(DEFAULT_FILTERS)} className="text-sm text-zinc-400 underline hover:text-white">
           Limpar filtros

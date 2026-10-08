@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { MAX_PAGE } from "@/lib/filters";
 import { REVALIDATE, TmdbError, tmdbFetch, type TmdbParams } from "./client";
 import { mapBrFlatrate, mapMovie, mapMovieDetails, mapProvider } from "./mappers";
@@ -31,23 +32,23 @@ const SORT_PARAM: Record<SortOption, string> = {
 
 const brPriority = (p: TmdbProvider) => p.display_priorities?.BR ?? p.display_priority ?? Number.MAX_SAFE_INTEGER;
 
-export async function getProviderOptions(): Promise<Provider[]> {
+export const getProviderOptions = cache(async (): Promise<Provider[]> => {
   const data = await tmdbFetch<{ results: TmdbProvider[] }>("/watch/providers/movie", { watch_region: "BR" }, REVALIDATE.long);
   return data.results
     .filter((p) => SUBSCRIPTION_PROVIDER_IDS.includes(p.provider_id))
     .sort((a, b) => brPriority(a) - brPriority(b))
     .slice(0, PROVIDER_OPTIONS_LIMIT)
     .map(mapProvider);
-}
+});
 
-export async function getMovieProviders(id: number): Promise<Provider[]> {
+export const getMovieProviders = cache(async (id: number): Promise<Provider[]> => {
   try {
     const data = await tmdbFetch<TmdbWatchProviders>(`/movie/${id}/watch/providers`, {}, REVALIDATE.short);
     return mapBrFlatrate(data);
   } catch {
     return [];
   }
-}
+});
 
 async function withProviders(movies: TmdbMovie[]): Promise<Movie[]> {
   return Promise.all(movies.map(async (m) => mapMovie(m, await getMovieProviders(m.id))));
@@ -122,7 +123,7 @@ export async function searchMovies(query: string, startPage = 1): Promise<Page<M
   return { items, page: lastPage, totalPages };
 }
 
-export async function getMovieDetails(id: number): Promise<MovieDetails | null> {
+export const getMovieDetails = cache(async (id: number): Promise<MovieDetails | null> => {
   try {
     const data = await tmdbFetch<TmdbMovieDetails>(
       `/movie/${id}`,
@@ -134,4 +135,4 @@ export async function getMovieDetails(id: number): Promise<MovieDetails | null> 
     if (error instanceof TmdbError && error.status === 404) return null;
     throw error;
   }
-}
+});

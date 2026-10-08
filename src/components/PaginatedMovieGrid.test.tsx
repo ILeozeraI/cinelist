@@ -68,3 +68,23 @@ describe("PaginatedMovieGrid", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
+
+describe("PaginatedMovieGrid sem resultados", () => {
+  const emptyMessage = "Nada por aqui.";
+
+  it("vazio com mais páginas mostra a dica e o botão", () => {
+    render(<PaginatedMovieGrid initial={pageOf([], 3, 10)} loadPage={vi.fn()} emptyMessage={emptyMessage} />);
+    expect(screen.getByText(/Ainda não encontramos esse filme nos streamings/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Carregar mais" })).toBeInTheDocument();
+    expect(screen.queryByText(emptyMessage)).not.toBeInTheDocument();
+  });
+
+  it("chegando na última página sem nada, troca o botão pela mensagem final", async () => {
+    const loadPage = vi.fn().mockResolvedValue(pageOf([], 10, 10));
+    render(<PaginatedMovieGrid initial={pageOf([], 3, 10)} loadPage={loadPage} emptyMessage={emptyMessage} />);
+    await userEvent.click(screen.getByRole("button", { name: "Carregar mais" }));
+    expect(await screen.findByText(emptyMessage)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Carregar mais" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ainda não encontramos/)).not.toBeInTheDocument();
+  });
+});

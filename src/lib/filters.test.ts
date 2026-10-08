@@ -65,6 +65,7 @@ describe("parseMovieId", () => {
     expect(parseMovieId("0")).toBeNull();
     expect(parseMovieId("-5")).toBeNull();
     expect(parseMovieId("12.5")).toBeNull();
+    expect(parseMovieId("99999999999999999999")).toBeNull();
   });
 });
 

@@ -2,10 +2,13 @@ import type { Trailer, TmdbVideo } from "./tmdb/types";
 
 const NOT_ALLOWED = Number.POSITIVE_INFINITY;
 
-/** pt oficial (0) > pt (1) > en oficial (2) > en (3); demais idiomas ficam de fora. */
+/** pt-BR oficial (0) > pt-BR (1) > pt oficial (2) > pt (3) > en oficial (4) > en (5); demais idiomas ficam de fora. */
 function rank(v: TmdbVideo): number {
-  if (v.iso_639_1 === "pt") return v.official ? 0 : 1;
-  if (v.iso_639_1 === "en") return v.official ? 2 : 3;
+  if (v.iso_639_1 === "pt") {
+    const base = v.iso_3166_1 === "BR" ? 0 : 2;
+    return base + (v.official ? 0 : 1);
+  }
+  if (v.iso_639_1 === "en") return v.official ? 4 : 5;
   return NOT_ALLOWED;
 }
 

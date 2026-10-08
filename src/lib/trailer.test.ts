@@ -15,6 +15,12 @@ describe("pickTrailer", () => {
     expect(pickTrailer([enUnofficial])?.key).toBe("en");
   });
 
+  it("trailer em português do Brasil vence outro português", () => {
+    const ptPt = video({ key: "ptPt", iso_639_1: "pt", iso_3166_1: "PT" });
+    const ptBrUnofficial = video({ key: "ptBr", iso_639_1: "pt", iso_3166_1: "BR", official: false });
+    expect(pickTrailer([ptPt, ptBrUnofficial])?.key).toBe("ptBr");
+  });
+
   it("ignora o que não é trailer do YouTube", () => {
     expect(pickTrailer([video({ type: "Teaser" }), video({ site: "Vimeo" })])).toBeNull();
   });

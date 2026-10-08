@@ -7,9 +7,11 @@ import { MovieGrid } from "./MovieGrid";
 type Props = {
   initial: Page<Movie>;
   loadPage: (page: number) => Promise<Page<Movie>>;
+  /** Mostrada quando não há nenhum filme e não existem mais páginas. */
+  emptyMessage?: string;
 };
 
-export function PaginatedMovieGrid({ initial, loadPage }: Props) {
+export function PaginatedMovieGrid({ initial, loadPage, emptyMessage }: Props) {
   const [items, setItems] = useState(initial.items);
   const [page, setPage] = useState(initial.page);
   const [totalPages, setTotalPages] = useState(initial.totalPages);
@@ -38,7 +40,13 @@ export function PaginatedMovieGrid({ initial, loadPage }: Props) {
 
   return (
     <div className="space-y-6">
-      <MovieGrid movies={items} />
+      {items.length > 0 && <MovieGrid movies={items} />}
+      {items.length === 0 && page >= totalPages && emptyMessage && <p className="text-zinc-400">{emptyMessage}</p>}
+      {items.length === 0 && page < totalPages && (
+        <p className="text-zinc-400">
+          Ainda não encontramos esse filme nos streamings. Carregue mais para continuar procurando.
+        </p>
+      )}
       {status === "error" && (
         <p role="alert" className="text-center text-sm text-red-400">
           Não foi possível carregar mais filmes. Tente de novo.

@@ -32,6 +32,12 @@ cp .env.example .env.local   # depois cole o seu token no .env.local
 npm run dev                  # http://localhost:3000
 ```
 
+O `npm run build` também precisa do token no `.env.local`, porque a página Início é gerada na hora do build.
+
+## Publicação
+
+Na Vercel, cadastre `TMDB_API_READ_ACCESS_TOKEN` em Environment Variables antes do primeiro deploy.
+
 ## Scripts
 
 | Comando | O que faz |

@@ -2,6 +2,8 @@
 
 Catálogo para **descobrir o que assistir**: os filmes disponíveis agora nos streamings **por assinatura no Brasil** (Netflix, Prime Video, Max, Disney+, Globoplay…), com visual de vitrine e tema escuro.
 
+🔗 **Site no ar:** https://cinelist-nine.vercel.app
+
 ## Funcionalidades
 
 - **Início:** filme em destaque + 10 fileiras por gênero (Ação, Comédia, Drama, Terror…), cada uma com os logos dos streamings onde o filme está.

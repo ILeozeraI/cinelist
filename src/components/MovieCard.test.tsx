@@ -19,6 +19,14 @@ describe("MovieCard", () => {
     expect(screen.getAllByText("Duna: Parte Dois")).toHaveLength(2);
   });
 
+  it("carrega o pôster sob demanda, ou na hora quando está no topo da tela", () => {
+    const { unmount } = render(<MovieCard movie={makeMovie()} />);
+    expect(screen.getByRole("img", { name: /Pôster/ })).toHaveAttribute("loading", "lazy");
+    unmount();
+    render(<MovieCard movie={makeMovie()} eager />);
+    expect(screen.getByRole("img", { name: /Pôster/ })).toHaveAttribute("loading", "eager");
+  });
+
   it("sem ano e sem nota mostra só um traço", () => {
     render(<MovieCard movie={makeMovie({ year: null, rating: 0, providers: [] })} />);
     expect(screen.getByText("—")).toBeInTheDocument();

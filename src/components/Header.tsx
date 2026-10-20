@@ -4,12 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { APP_NAME } from "@/lib/site";
+import { AccountMenu } from "./AccountMenu";
 import { SearchIcon } from "./Icons";
 
 const LINKS = [
   { href: "/", label: "Início" },
   { href: "/explorar", label: "Explorar" },
 ];
+
+// O Início também fica ativo nas listas pessoais (abas ao lado da Descobrir).
+const HOME_PATHS = ["/", "/quero-assistir", "/ja-assisti"];
 
 function subscribeToScroll(onChange: () => void) {
   window.addEventListener("scroll", onChange, { passive: true });
@@ -37,7 +41,7 @@ export function Header() {
         </Link>
         <nav aria-label="Principal" className="flex gap-6 text-sm md:text-[0.95rem]">
           {LINKS.map((link) => {
-            const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+            const active = link.href === "/" ? HOME_PATHS.includes(pathname) : pathname.startsWith(link.href);
             return (
               <Link
                 key={link.href}
@@ -65,6 +69,9 @@ export function Header() {
             className="w-full rounded-full border border-white/10 bg-black/40 py-2 pr-4 pl-10 text-sm backdrop-blur-md transition placeholder:text-tela/45 focus:border-projetor/60 focus:bg-black/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-projetor/40"
           />
         </form>
+        <div className="ml-auto md:ml-0">
+          <AccountMenu />
+        </div>
       </div>
     </header>
   );

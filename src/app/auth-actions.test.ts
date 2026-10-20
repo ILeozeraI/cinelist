@@ -168,9 +168,9 @@ describe("signUp", () => {
 });
 
 describe("signOut", () => {
-  it("sai e volta para a Descobrir, mesmo se a rede falhar", async () => {
+  it("sai sem redirecionar, mesmo se a rede falhar", async () => {
     auth.signOut.mockRejectedValue(new Error("rede"));
-    await expect(signOut()).rejects.toThrow("REDIRECT:/");
+    await expect(signOut()).resolves.toBeUndefined();
     expect(auth.signOut).toHaveBeenCalled();
   });
 });

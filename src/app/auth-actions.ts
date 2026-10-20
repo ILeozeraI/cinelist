@@ -89,5 +89,4 @@ export async function signOut(): Promise<void> {
   } catch {
     // Os cookies são limpos de qualquer forma.
   }
-  redirect("/");
 }

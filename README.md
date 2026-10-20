@@ -70,7 +70,7 @@ Na Vercel, cadastre `TMDB_API_READ_ACCESS_TOKEN` em Environment Variables antes 
 |---|---|
 | `npm run dev` | servidor de desenvolvimento |
 | `npm test` | testes de unidade e componentes |
-| `npm run e2e` | testes de ponta a ponta (precisa do token) |
+| `npm run e2e` | testes de ponta a ponta (precisa do token do TMDB, das variáveis do Supabase e do projeto do Supabase já configurado, veja acima) |
 | `npm run typecheck` | checagem de tipos (rode `npm run build` uma vez antes) |
 | `npm run lint` | lint |
 | `npm run build` | build de produção |

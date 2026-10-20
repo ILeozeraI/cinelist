@@ -12,12 +12,18 @@ const PERSONAL_TABS = ["/quero-assistir", "/ja-assisti"];
 // undefined = ainda não sabemos; null = sem sessão.
 type Email = string | null | undefined;
 
+// Caminho com a busca (?q=…): usePathname não traz a query e useSearchParams tiraria o layout do estático.
+function currentPath(): string {
+  return `${window.location.pathname}${window.location.search}`;
+}
+
 export function AccountMenu() {
   const pathname = usePathname();
   const router = useRouter();
   const [email, setEmail] = useState<Email>(undefined);
   const [open, setOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [returnTo, setReturnTo] = useState(pathname);
   const rootRef = useRef<HTMLDivElement>(null);
 
   // O cabeçalho vive no layout raiz (estático): a sessão é lida aqui, no navegador.
@@ -27,7 +33,9 @@ export function AccountMenu() {
     let active = true;
     const first = supabase ? supabase.auth.getSession().then(({ data }) => data.session?.user.email ?? null) : Promise.resolve(null);
     first.then((value) => {
-      if (active) setEmail(value);
+      if (!active) return;
+      setReturnTo(currentPath());
+      setEmail(value);
     });
     const listener = supabase?.auth.onAuthStateChange((_event, session) => {
       if (active) setEmail(session?.user.email ?? null);
@@ -57,20 +65,38 @@ export function AccountMenu() {
   async function handleSignOut() {
     if (leaving) return;
     setLeaving(true);
-    await signOut();
-    setLeaving(false);
+    try {
+      await signOut();
+    } catch {
+      // A chamada nem chegou ao servidor: a sessão continua e o Sair volta a funcionar.
+      return;
+    } finally {
+      setLeaving(false);
+    }
     setOpen(false);
     setEmail(null);
-    if (PERSONAL_TABS.some((tab) => pathname.startsWith(tab))) router.push("/");
-    else router.refresh();
+    // Recarregar de verdade: os botões de marcar guardam o estado de quem saiu.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a recarga completa é proposital
+    if (PERSONAL_TABS.some((tab) => pathname.startsWith(tab))) window.location.assign("/");
+    else window.location.reload();
   }
 
   if (email === undefined) return <span aria-hidden className="inline-block h-9 w-20 shrink-0" />;
 
   if (email === null) {
+    // Na própria /entrar o link trocaria o voltar que já está lá.
+    if (pathname.startsWith("/entrar")) return null;
+    const href = loginHref(returnTo);
     return (
       <Link
-        href={loginHref(pathname)}
+        href={href}
+        onNavigate={(event) => {
+          // A busca pode ter mudado sem trocar de página (/buscar?q=…): usa a URL do momento do clique.
+          const fresh = loginHref(currentPath());
+          if (fresh === href) return;
+          event.preventDefault();
+          router.push(fresh);
+        }}
         className="inline-flex h-9 shrink-0 items-center rounded-full border border-projetor px-4 text-sm font-medium text-projetor transition-colors hover:bg-projetor hover:text-sala focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-projetor"
       >
         Entrar

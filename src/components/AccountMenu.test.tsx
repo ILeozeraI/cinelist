@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { signOut } from "@/app/auth-actions";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { AccountMenu } from "./AccountMenu";
@@ -11,6 +11,10 @@ vi.mock("next/navigation", () => ({ usePathname: () => pathname, useRouter: () =
 vi.mock("@/lib/supabase/browser", () => ({ getSupabaseBrowserClient: vi.fn() }));
 vi.mock("@/app/auth-actions", () => ({ signOut: vi.fn() }));
 
+const reload = vi.fn();
+const assign = vi.fn();
+let search = "";
+
 const getSession = vi.fn();
 const unsubscribe = vi.fn();
 const onAuthStateChange = vi.fn();
@@ -21,6 +25,20 @@ function withSession(email: string | null) {
 
 beforeEach(() => {
   pathname = "/filme/5";
+  search = "";
+  reload.mockReset();
+  assign.mockReset();
+  // O jsdom não deixa trocar reload/assign; o objeto location inteiro é substituído.
+  vi.stubGlobal("location", {
+    get pathname() {
+      return pathname;
+    },
+    get search() {
+      return search;
+    },
+    reload,
+    assign,
+  });
   router.refresh.mockReset();
   router.push.mockReset();
   getSession.mockReset();
@@ -29,6 +47,8 @@ beforeEach(() => {
   vi.mocked(getSupabaseBrowserClient).mockReset().mockReturnValue({ auth: { getSession, onAuthStateChange } } as never);
   withSession(null);
 });
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("AccountMenu", () => {
   it("sem sessão mostra Entrar com retorno para a página atual", async () => {
@@ -58,15 +78,15 @@ describe("AccountMenu", () => {
     expect(screen.queryByRole("button", { name: "Sair" })).toBeNull();
   });
 
-  it("Sair encerra a sessão e fica na página", async () => {
+  it("Sair encerra a sessão e recarrega a página", async () => {
     withSession("ana@ex.com");
     render(<AccountMenu />);
     fireEvent.click(await screen.findByRole("button", { name: /ana@ex\.com/ }));
     fireEvent.click(screen.getByRole("button", { name: "Sair" }));
-    await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+    await waitFor(() => expect(reload).toHaveBeenCalled());
     expect(signOut).toHaveBeenCalled();
-    expect(router.push).not.toHaveBeenCalled();
-    expect(await screen.findByRole("link", { name: "Entrar" })).toBeInTheDocument();
+    expect(assign).not.toHaveBeenCalled();
+    expect(router.refresh).not.toHaveBeenCalled();
   });
 
   it("Sair numa aba pessoal vai para a Início", async () => {
@@ -75,8 +95,36 @@ describe("AccountMenu", () => {
     render(<AccountMenu />);
     fireEvent.click(await screen.findByRole("button", { name: /ana@ex\.com/ }));
     fireEvent.click(screen.getByRole("button", { name: "Sair" }));
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/"));
-    expect(router.refresh).not.toHaveBeenCalled();
+    await waitFor(() => expect(assign).toHaveBeenCalledWith("/"));
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("se o Sair falhar no caminho, o botão volta a funcionar", async () => {
+    vi.mocked(signOut).mockRejectedValue(new Error("rede"));
+    withSession("ana@ex.com");
+    render(<AccountMenu />);
+    fireEvent.click(await screen.findByRole("button", { name: /ana@ex\.com/ }));
+    const sair = screen.getByRole("button", { name: "Sair" });
+    fireEvent.click(sair);
+    await waitFor(() => expect(signOut).toHaveBeenCalled());
+    await waitFor(() => expect(sair).toBeEnabled());
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("Entrar guarda a busca atual no retorno", async () => {
+    pathname = "/buscar";
+    search = "?q=duna";
+    render(<AccountMenu />);
+    expect(await screen.findByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/entrar?voltar=%2Fbuscar%3Fq%3Dduna");
+  });
+
+  it("na própria página de entrar não mostra o Entrar", async () => {
+    pathname = "/entrar";
+    search = "?voltar=%2Ffilme%2F5";
+    render(<AccountMenu />);
+    await waitFor(() => expect(getSession).toHaveBeenCalled());
+    await act(async () => {});
+    expect(screen.queryByRole("link", { name: "Entrar" })).toBeNull();
   });
 
   it("sem Supabase mostra Entrar", async () => {

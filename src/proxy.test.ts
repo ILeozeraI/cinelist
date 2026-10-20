@@ -5,7 +5,7 @@ describe("config.matcher", () => {
   const [pattern] = config.matcher;
 
   it("escapa o ponto da extensão de imagem", () => {
-    expect(pattern).toContain("\.(?:");
+    expect(pattern).toContain(String.raw`\.(?:`);
   });
 
   it("exclui api/", () => {

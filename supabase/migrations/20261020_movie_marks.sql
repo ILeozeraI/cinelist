@@ -22,8 +22,12 @@ create index if not exists movie_marks_user_status_updated_idx
 -- 3) Segurança por linha (RLS): sem isso, qualquer um poderia ler os dados dos outros.
 alter table public.movie_marks enable row level security;
 
--- 4) Permissões da tabela: só usuários logados (authenticated). Visitantes (anon) não recebem nada.
+-- 4) Permissões da tabela: usuários logados (authenticated) podem ler e mexer (limitados pelas regras abaixo).
 grant select, insert, update, delete on public.movie_marks to authenticated;
+-- Visitantes (anon) só podem ler, para o aviso diário que mantém o projeto acordado.
+-- Sem política para anon, a leitura volta 0 linhas: nenhum dado é exposto.
+revoke insert, update, delete on public.movie_marks from anon;
+grant select on public.movie_marks to anon;
 
 -- 5) Regras (políticas): cada usuário só enxerga e mexe nas próprias linhas.
 -- Ver só as próprias marcações.

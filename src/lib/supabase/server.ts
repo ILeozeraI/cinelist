@@ -1,0 +1,38 @@
+import "server-only";
+import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { getSupabaseEnv } from "./env";
+
+// Devolve null quando o Supabase não está configurado (o site público segue funcionando).
+export async function createSupabaseServerClient(): Promise<SupabaseClient | null> {
+  const env = getSupabaseEnv();
+  if (!env) return null;
+
+  const cookieStore = await cookies();
+  return createServerClient(env.url, env.key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        // Server Components não podem gravar cookies; o proxy renova a sessão nesse caso.
+        try {
+          for (const { name, value, options } of cookiesToSet) cookieStore.set(name, value, options);
+        } catch {}
+      },
+    },
+  });
+}
+
+// Id do usuário logado (token validado) ou null se for anônimo.
+// Lança erro se o Supabase não responder, para não confundir "anônimo" com "fora do ar".
+export async function getCurrentUserId(supabase: SupabaseClient): Promise<string | null> {
+  const { data, error } = await supabase.auth.getClaims();
+  if (error) {
+    // Sem sessão é o caso normal de visitante anônimo.
+    if (error.name === "AuthSessionMissingError") return null;
+    throw error;
+  }
+  return data?.claims.sub ?? null;
+}

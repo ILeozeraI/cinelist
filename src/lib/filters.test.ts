@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_FILTERS, parseFilters, parseHomeRating, parseMovieId, parsePage, serializeFilters } from "./filters";
+import { DEFAULT_FILTERS, isMovieId, parseFilters, parseHomeRating, parseMovieId, parsePage, serializeFilters } from "./filters";
 import type { DiscoverFilters } from "./tmdb/types";
 
 const YEAR = 2026;
@@ -95,5 +95,17 @@ describe("parsePage", () => {
     expect(parsePage(501)).toBeNull();
     expect(parsePage(1.5)).toBeNull();
     expect(parsePage("2")).toBeNull();
+  });
+});
+
+describe("isMovieId", () => {
+  it("aceita só number inteiro seguro maior que zero", () => {
+    expect(isMovieId(693134)).toBe(true);
+    expect(isMovieId(0)).toBe(false);
+    expect(isMovieId(-1)).toBe(false);
+    expect(isMovieId(1.5)).toBe(false);
+    expect(isMovieId("12")).toBe(false);
+    expect(isMovieId(null)).toBe(false);
+    expect(isMovieId(Number.MAX_SAFE_INTEGER + 1)).toBe(false);
   });
 });

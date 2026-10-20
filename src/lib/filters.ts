@@ -86,3 +86,8 @@ export function parseMovieId(raw: string): number | null {
 export function parsePage(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= MAX_PAGE ? value : null;
 }
+
+/** Id de filme válido (mesma regra de `positiveInt`), para o que chega de fora tipado como `unknown`. */
+export function isMovieId(v: unknown): v is number {
+  return typeof v === "number" && Number.isSafeInteger(v) && v > 0;
+}

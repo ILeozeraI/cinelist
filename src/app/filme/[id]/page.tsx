@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AmbientLight } from "@/components/AmbientLight";
 import { BackLink } from "@/components/BackLink";
+import { MarkButtons } from "@/components/MarkButtons";
 import { MovieMeta } from "@/components/MovieMeta";
 import { TrailerPlayer } from "@/components/TrailerPlayer";
 import { parseMovieId } from "@/lib/filters";
@@ -75,6 +76,7 @@ export default async function MoviePage({ params }: Props) {
             <h2 id="onde-assistir" className="font-display text-2xl font-bold tracking-[0.01em]">
               Onde assistir
             </h2>
+            <MarkButtons movieId={movie.id} />
             {movie.providers.length > 0 ? (
               <>
                 <ul aria-label="Disponível em" className="flex flex-wrap gap-2.5">

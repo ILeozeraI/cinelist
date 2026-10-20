@@ -43,3 +43,11 @@ export function InfoIcon({ className = "size-5" }: IconProps) {
     </svg>
   );
 }
+
+export function CheckIcon({ className = "size-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
+    </svg>
+  );
+}

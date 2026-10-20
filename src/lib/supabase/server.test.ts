@@ -1,10 +1,27 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { AuthApiError, AuthInvalidJwtError, AuthRetryableFetchError } from "@supabase/supabase-js";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("next/headers", () => ({ cookies: vi.fn() }));
+const createServerClient = vi.fn((..._args: unknown[]) => ({})); // eslint-disable-line @typescript-eslint/no-unused-vars
+vi.mock("next/headers", () => ({ cookies: vi.fn(async () => ({ getAll: () => [], set: vi.fn() })) }));
+vi.mock("@supabase/ssr", () => ({ createServerClient: (...a: unknown[]) => createServerClient(...a) }));
 
-import { getCurrentUserId } from "./server";
+import { SUPABASE_TIMEOUT_MS, supabaseFetch } from "./env";
+import { createSupabaseServerClient, getCurrentUserId } from "./server";
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllEnvs();
+});
+
+describe("createSupabaseServerClient", () => {
+  it("usa o fetch com tempo limite", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://x.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_x");
+    await createSupabaseServerClient();
+    expect(createServerClient.mock.calls[0][2]).toMatchObject({ global: { fetch: supabaseFetch } });
+  });
+});
 
 const fakeClient = (result: unknown) =>
   ({ auth: { getClaims: vi.fn().mockResolvedValue(result) } }) as unknown as SupabaseClient;
@@ -32,5 +49,13 @@ describe("getCurrentUserId", () => {
     ["status 500", new AuthApiError("erro interno", 500, undefined)],
   ])("relança %s", async (_nome, error) => {
     await expect(getCurrentUserId(fakeClient({ data: null, error }))).rejects.toBe(error);
+  });
+
+  it("relança se o Supabase não responder a tempo", async () => {
+    vi.useFakeTimers();
+    const c = { auth: { getClaims: vi.fn(() => new Promise(() => {})) } } as unknown as SupabaseClient;
+    const result = expect(getCurrentUserId(c)).rejects.toThrow();
+    await vi.advanceTimersByTimeAsync(SUPABASE_TIMEOUT_MS);
+    await result;
   });
 });

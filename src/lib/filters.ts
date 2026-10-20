@@ -71,6 +71,14 @@ export function serializeFilters(f: DiscoverFilters): string {
   return p.toString();
 }
 
+/** Notas mínimas dos botões da Início ("7+", "8+", "9+"); sem nota é "Todos". */
+export const HOME_RATING_PRESETS: readonly number[] = [7, 8, 9];
+
+/** Lê o `?nota=` da Início; qualquer valor fora dos botões vale como "Todos". */
+export function parseHomeRating(raw: string | null): number | null {
+  return HOME_RATING_PRESETS.find((r) => String(r) === raw) ?? null;
+}
+
 export function parseMovieId(raw: string): number | null {
   return positiveInt(raw);
 }

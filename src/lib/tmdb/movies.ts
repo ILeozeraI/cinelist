@@ -1,11 +1,13 @@
 import "server-only";
 import { cache } from "react";
 import { MAX_PAGE } from "@/lib/filters";
+import { HOME_GENRES } from "@/lib/genres";
 import { REVALIDATE, TmdbError, tmdbFetch, type TmdbParams } from "./client";
 import { mapBrFlatrate, mapMovie, mapMovieDetails, mapProvider } from "./mappers";
 import type {
   DiscoverFilters,
   FeaturedMovie,
+  GenreRow,
   Movie,
   MovieDetails,
   Page,
@@ -22,7 +24,8 @@ import type {
 export const SUBSCRIPTION_PROVIDER_IDS: readonly number[] = [8, 119, 350, 337, 167, 47, 531, 1899, 307, 283, 11, 19, 190];
 export const PROVIDER_OPTIONS_LIMIT = 8;
 
-const MIN_VOTES_FOR_RATING_SORT = 200;
+/** Sem um mínimo de votos, filtrar ou ordenar por nota traz filmes obscuros com nota 10 dada por 3 pessoas. */
+const MIN_VOTES_FOR_RATING = 200;
 const MAX_SEARCH_PAGES_PER_CALL = 3;
 
 const SORT_PARAM: Record<SortOption, string> = {
@@ -69,7 +72,7 @@ function discoverParams(filters: DiscoverFilters, providerIds: number[], page: n
     "primary_release_date.gte": filters.yearFrom ? `${filters.yearFrom}-01-01` : undefined,
     "primary_release_date.lte": filters.yearTo ? `${filters.yearTo}-12-31` : undefined,
     "vote_average.gte": filters.minRating ?? undefined,
-    "vote_count.gte": filters.sort === "nota" ? MIN_VOTES_FOR_RATING_SORT : undefined,
+    "vote_count.gte": filters.sort === "nota" || filters.minRating !== null ? MIN_VOTES_FOR_RATING : undefined,
     sort_by: SORT_PARAM[filters.sort],
     include_adult: "false",
     page,
@@ -95,8 +98,18 @@ const POPULAR: DiscoverFilters = {
   sort: "popularidade",
 };
 
-export async function getGenreRow(genreId: number): Promise<Movie[]> {
-  return (await discoverMovies({ ...POPULAR, genreId })).items;
+export async function getGenreRow(genreId: number, minRating: number | null = null): Promise<Movie[]> {
+  return (await discoverMovies({ ...POPULAR, genreId, minRating })).items;
+}
+
+/** As fileiras de gênero da Início com nota mínima; a que vem vazia ou falha some. */
+export async function getRatedGenreRows(minRating: number): Promise<GenreRow[]> {
+  const results = await Promise.allSettled(HOME_GENRES.map((genre) => getGenreRow(genre.id, minRating)));
+  if (results.every((r) => r.status === "rejected")) throw (results[0] as PromiseRejectedResult).reason;
+  return HOME_GENRES.flatMap((genre, i) => {
+    const result = results[i];
+    return result.status === "fulfilled" && result.value.length > 0 ? [{ genre, movies: result.value }] : [];
+  });
 }
 
 export const FEATURED_COUNT = 5;

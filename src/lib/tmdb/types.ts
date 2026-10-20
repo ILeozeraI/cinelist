@@ -26,6 +26,9 @@ export type FeaturedMovie = MovieDetails & { rank: number };
 
 export type Genre = { id: number; name: string };
 
+/** Uma fileira de gênero da Início, já com os filmes. */
+export type GenreRow = { genre: Genre; movies: Movie[] };
+
 export type SortOption = "popularidade" | "nota" | "lancamento";
 
 export type DiscoverFilters = {

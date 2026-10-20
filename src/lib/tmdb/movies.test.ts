@@ -9,6 +9,7 @@ import {
   getMovieDetails,
   getMovieProviders,
   getProviderOptions,
+  getRatedGenreRows,
   PROVIDER_OPTIONS_LIMIT,
   searchMovies,
   SUBSCRIPTION_PROVIDER_IDS,
@@ -125,6 +126,16 @@ describe("discoverMovies", () => {
     expect(params["vote_count.gte"]).toBeUndefined();
   });
 
+  it("nota mínima exige o mínimo de votos mesmo ordenando por popularidade", async () => {
+    route({ "/discover/movie": () => paged([]) });
+    await discoverMovies({ ...DEFAULT_FILTERS, providerIds: [8], minRating: 8 });
+    expect(callsTo("/discover/movie")[0].params).toMatchObject({
+      "vote_average.gte": 8,
+      "vote_count.gte": 200,
+      sort_by: "popularity.desc",
+    });
+  });
+
   it("limita o total de páginas a 500", async () => {
     route({ "/discover/movie": () => paged([], 1, 9000) });
     expect((await discoverMovies({ ...DEFAULT_FILTERS, providerIds: [8] })).totalPages).toBe(500);
@@ -137,6 +148,47 @@ describe("getGenreRow e getFeatured", () => {
     const row = await getGenreRow(27);
     expect(row.map((m) => m.title)).toEqual(["Duna: Parte Dois"]);
     expect(callsTo("/discover/movie")[0].params).toMatchObject({ with_genres: 27, sort_by: "popularity.desc" });
+    expect(callsTo("/discover/movie")[0].params["vote_average.gte"]).toBeUndefined();
+  });
+
+  it("fileira de gênero com nota mínima", async () => {
+    route({ ...optionsRoute, "/discover/movie": () => paged([]) });
+    await getGenreRow(28, 8);
+    expect(callsTo("/discover/movie")[0].params).toMatchObject({
+      with_genres: 28,
+      "vote_average.gte": 8,
+      "vote_count.gte": 200,
+      sort_by: "popularity.desc",
+    });
+  });
+
+  it("fileiras com nota mínima seguem a ordem da Início e as vazias ou com falha somem", async () => {
+    route({
+      ...optionsRoute,
+      "/discover/movie": (params) => {
+        if (params.with_genres === 35) return paged([]); // Comédia: nenhum filme com essa nota
+        if (params.with_genres === 18) return new TmdbError(500, "falhou"); // Drama: erro
+        return paged([{ ...duna, id: Number(params.with_genres) }]);
+      },
+    });
+    const rows = await getRatedGenreRows(8);
+    expect(rows.map((r) => r.genre.name)).toEqual([
+      "Ação",
+      "Terror",
+      "Ficção científica",
+      "Romance",
+      "Animação",
+      "Suspense",
+      "Crime",
+      "Aventura",
+    ]);
+    expect(rows[0].movies.map((m) => m.id)).toEqual([28]);
+    expect(callsTo("/discover/movie").every((c) => c.params["vote_average.gte"] === 8)).toBe(true);
+  });
+
+  it("fileiras com nota mínima: se todas falham, o erro sobe", async () => {
+    route({ ...optionsRoute, "/discover/movie": () => new TmdbError(500, "falhou") });
+    await expect(getRatedGenreRows(8)).rejects.toThrow("falhou");
   });
 
   it("destaques são os populares com imagem de fundo, com detalhes e posição no ranking", async () => {

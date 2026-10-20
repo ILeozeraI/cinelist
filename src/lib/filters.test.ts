@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_FILTERS, parseFilters, parseMovieId, parsePage, serializeFilters } from "./filters";
+import { DEFAULT_FILTERS, parseFilters, parseHomeRating, parseMovieId, parsePage, serializeFilters } from "./filters";
 import type { DiscoverFilters } from "./tmdb/types";
 
 const YEAR = 2026;
@@ -55,6 +55,24 @@ describe("serializeFilters", () => {
   it("ida e volta preserva os filtros", () => {
     const back = parseFilters(Object.fromEntries(new URLSearchParams(serializeFilters(full))), YEAR);
     expect(back).toEqual(full);
+  });
+});
+
+describe("parseHomeRating", () => {
+  it("aceita só as notas dos botões da Início", () => {
+    expect(parseHomeRating("7")).toBe(7);
+    expect(parseHomeRating("8")).toBe(8);
+    expect(parseHomeRating("9")).toBe(9);
+  });
+
+  it("qualquer outro valor vale como Todos", () => {
+    expect(parseHomeRating(null)).toBeNull();
+    expect(parseHomeRating("")).toBeNull();
+    expect(parseHomeRating("5")).toBeNull();
+    expect(parseHomeRating("8.5")).toBeNull();
+    expect(parseHomeRating("10")).toBeNull();
+    expect(parseHomeRating("abc")).toBeNull();
+    expect(parseHomeRating("08")).toBeNull();
   });
 });
 

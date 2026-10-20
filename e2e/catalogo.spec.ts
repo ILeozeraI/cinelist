@@ -9,6 +9,27 @@ test("Início mostra fileiras de gênero com filmes", async ({ page }) => {
   await expect(cardsIn(acao).first()).toBeVisible();
 });
 
+test("Início: filtro 8+ deixa só filmes com nota 8 ou mais e mantém o Top 10", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "8+" }).click();
+  await expect(page).toHaveURL(/\/\?nota=8$/);
+  await expect(page.getByRole("button", { name: "8+" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("region", { name: "Top 10 nos streamings hoje" })).toBeVisible();
+
+  // Fileiras filtradas são as que levam a nota para o Explorar.
+  const filtered = page.locator('section:has(a[href*="nota=8"])');
+  await expect(filtered.first()).toBeVisible();
+  const ratings = (await cardsIn(filtered).locator("p").allTextContents()).map((t) => Number(t.match(/(\d+\.\d)$/)?.[1]));
+  expect(ratings.length).toBeGreaterThan(0);
+  for (const rating of ratings) expect(rating).toBeGreaterThanOrEqual(8);
+
+  await page.reload();
+  await expect(page.getByRole("button", { name: "8+" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Todos" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator('section:has(a[href*="nota="])')).toHaveCount(0);
+});
+
 test("card abre os detalhes e Voltar retorna", async ({ page }) => {
   await page.goto("/");
   await cardsIn(page.getByRole("region", { name: "Ação", exact: true })).first().click();

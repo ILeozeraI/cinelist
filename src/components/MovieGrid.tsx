@@ -6,7 +6,7 @@ export const EAGER_POSTERS = 5;
 
 export function MovieGrid({ movies }: { movies: Movie[] }) {
   return (
-    <ul aria-label="Filmes" className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    <ul aria-label="Filmes" className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
       {movies.map((movie, i) => (
         <li key={movie.id}>
           <MovieCard movie={movie} eager={i < EAGER_POSTERS} />

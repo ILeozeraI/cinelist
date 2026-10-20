@@ -25,7 +25,7 @@ export function TrailerPlayer({ trailer, title }: { trailer: Trailer; title: str
       type="button"
       onClick={() => setPlaying(true)}
       aria-label={`Assistir ao trailer de ${title}`}
-      className="group relative block aspect-video w-full overflow-hidden rounded-xl bg-zinc-900"
+      className="group relative block aspect-video w-full overflow-hidden rounded-xl bg-poltrona ring-1 ring-white/10"
     >
       <Image
         src={`https://i.ytimg.com/vi/${key}/hqdefault.jpg`}
@@ -36,7 +36,7 @@ export function TrailerPlayer({ trailer, title }: { trailer: Trailer; title: str
       />
       <span
         aria-hidden="true"
-        className="absolute inset-0 m-auto flex h-16 w-16 items-center justify-center rounded-full bg-yellow-400 text-2xl text-zinc-950"
+        className="absolute inset-0 m-auto flex h-16 w-16 items-center justify-center rounded-full bg-projetor text-sala shadow-[0_10px_40px_-8px_rgb(244_185_64/0.6)] transition group-hover:scale-110"
       >
         ▶
       </span>

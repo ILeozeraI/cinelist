@@ -139,14 +139,21 @@ describe("getGenreRow e getFeatured", () => {
     expect(callsTo("/discover/movie")[0].params).toMatchObject({ with_genres: 27, sort_by: "popularity.desc" });
   });
 
-  it("destaque é o primeiro filme com imagem de fundo", async () => {
-    route({ ...optionsRoute, "/discover/movie": () => paged([semPoster, duna]) });
-    expect((await getFeatured())?.id).toBe(693134);
+  it("destaques são os populares com imagem de fundo, com detalhes e posição no ranking", async () => {
+    route({ ...optionsRoute, "/discover/movie": () => paged([semPoster, duna]), "/movie/693134": () => dunaDetails });
+    const featured = await getFeatured();
+    expect(featured).toHaveLength(1);
+    expect(featured[0]).toMatchObject({ id: 693134, rank: 2, runtime: 166, genres: ["Ficção científica", "Aventura"] });
   });
 
   it("sem imagem de fundo não há destaque", async () => {
     route({ ...optionsRoute, "/discover/movie": () => paged([semPoster]) });
-    expect(await getFeatured()).toBeNull();
+    expect(await getFeatured()).toEqual([]);
+  });
+
+  it("destaque cujos detalhes falham é pulado", async () => {
+    route({ ...optionsRoute, "/discover/movie": () => paged([duna]), "/movie/693134": () => new TmdbError(500, "falhou") });
+    expect(await getFeatured()).toEqual([]);
   });
 });
 

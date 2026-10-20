@@ -32,6 +32,7 @@ export function mapMovieDetails(d: TmdbMovieDetails): MovieDetails {
     ...mapMovie(d, mapBrFlatrate(d["watch/providers"])),
     overview: d.overview?.trim() ?? "",
     runtime: d.runtime && d.runtime > 0 ? d.runtime : null,
+    genres: (d.genres ?? []).map((g) => g.name),
     trailer: pickTrailer(d.videos?.results ?? []),
   };
 }

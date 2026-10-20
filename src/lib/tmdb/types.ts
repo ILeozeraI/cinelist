@@ -17,8 +17,12 @@ export type Trailer = { key: string; name: string };
 export type MovieDetails = Movie & {
   overview: string;
   runtime: number | null;
+  genres: string[];
   trailer: Trailer | null;
 };
+
+/** Filme do destaque da Início; `rank` é a posição dele entre os mais populares. */
+export type FeaturedMovie = MovieDetails & { rank: number };
 
 export type Genre = { id: number; name: string };
 
@@ -73,6 +77,7 @@ export type TmdbVideo = {
 
 export type TmdbMovieDetails = TmdbMovie & {
   runtime: number | null;
+  genres?: { id: number; name: string }[];
   videos?: { results: TmdbVideo[] };
   "watch/providers"?: TmdbWatchProviders;
 };

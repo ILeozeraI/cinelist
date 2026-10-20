@@ -14,7 +14,7 @@ test("card abre os detalhes e Voltar retorna", async ({ page }) => {
   await cardsIn(page.getByRole("region", { name: "Ação", exact: true })).first().click();
   await expect(page).toHaveURL(/\/filme\/\d+$/);
   await expect(page.getByRole("heading", { name: "Onde assistir" })).toBeVisible();
-  await page.getByRole("button", { name: "← Voltar" }).click();
+  await page.getByRole("button", { name: "Voltar" }).click();
   await expect(page).toHaveURL(/\/$/);
 });
 

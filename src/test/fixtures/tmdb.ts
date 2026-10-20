@@ -29,6 +29,10 @@ export function video(over: Partial<TmdbVideo> = {}): TmdbVideo {
 export const dunaDetails: TmdbMovieDetails = {
   ...duna,
   runtime: 166,
+  genres: [
+    { id: 878, name: "Ficção científica" },
+    { id: 12, name: "Aventura" },
+  ],
   videos: { results: [video({ key: "en1" }), video({ key: "pt1", iso_639_1: "pt", iso_3166_1: "BR" })] },
   "watch/providers": providersBr(prime),
 };

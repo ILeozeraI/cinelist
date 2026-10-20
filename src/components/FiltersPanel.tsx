@@ -18,8 +18,8 @@ const SORT_LABELS: Record<SortOption, string> = {
 /** 0,5 a 9, de 0,5 em 0,5. */
 const RATING_OPTIONS = Array.from({ length: 18 }, (_, i) => (i + 1) / 2);
 
-const selectClass = "mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400";
-const labelClass = "block text-xs font-semibold uppercase tracking-wide text-zinc-400";
+const selectClass = "mt-1.5 w-full rounded-md border border-white/10 bg-poltrona px-3 py-2.5 text-sm transition hover:border-white/20 focus:border-projetor/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-projetor/40";
+const labelClass = "block text-sm font-semibold text-tela/90";
 
 const toNumberOrNull = (value: string) => (value === "" ? null : Number(value));
 
@@ -55,15 +55,15 @@ export function FiltersPanel({ providers, genres, filters: serverFilters, curren
   }
 
   return (
-    <aside aria-busy={isPending} className="md:w-64 md:shrink-0">
+    <aside aria-busy={isPending} className="md:sticky md:top-24 md:w-64 md:shrink-0 md:self-start md:rounded-xl md:bg-poltrona/70 md:p-5 md:ring-1 md:ring-white/5 md:backdrop-blur-md">
       <button
         type="button"
         aria-expanded={open}
         aria-controls="painel-filtros"
         onClick={() => setOpen((o) => !o)}
-        className="w-full rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold md:hidden"
+        className="w-full rounded-md border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold md:hidden"
       >
-        ⚙ Filtros
+        Filtros
       </button>
 
       <div id="painel-filtros" className={`${open ? "block" : "hidden"} mt-4 space-y-6 md:mt-0 md:block`}>
@@ -80,7 +80,7 @@ export function FiltersPanel({ providers, genres, filters: serverFilters, curren
                   aria-pressed={active}
                   title={p.name}
                   onClick={() => toggleProvider(p.id)}
-                  className={`overflow-hidden rounded-lg transition ${active ? "ring-2 ring-yellow-400" : "opacity-50 hover:opacity-100"}`}
+                  className={`overflow-hidden rounded-lg transition ${active ? "ring-2 ring-projetor ring-offset-2 ring-offset-sala" : "opacity-50 grayscale hover:opacity-100 hover:grayscale-0"}`}
                 >
                   {logo ? (
                     <Image src={logo} alt={p.name} width={48} height={48} className="h-auto w-full" />
@@ -169,12 +169,12 @@ export function FiltersPanel({ providers, genres, filters: serverFilters, curren
         </div>
 
         {isPending && (
-          <p role="status" className="text-xs text-zinc-400">
+          <p role="status" className="text-xs text-penumbra">
             Atualizando…
           </p>
         )}
 
-        <button type="button" onClick={() => apply(DEFAULT_FILTERS)} className="text-sm text-zinc-400 underline hover:text-white">
+        <button type="button" onClick={() => apply(DEFAULT_FILTERS)} className="text-sm text-penumbra underline underline-offset-4 hover:text-tela">
           Limpar filtros
         </button>
       </div>

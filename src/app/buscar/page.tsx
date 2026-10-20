@@ -14,9 +14,9 @@ export default async function BuscarPage({ searchParams }: Props) {
 
   if (!q) {
     return (
-      <div className="py-16 text-center">
-        <h1 className="text-2xl font-bold">Buscar filme</h1>
-        <p className="mt-2 text-zinc-400">Digite o nome de um filme no campo de busca lá em cima.</p>
+      <div className="shell page-top pb-16 text-center">
+        <h1 className="mt-10 font-display text-5xl font-extrabold uppercase">Buscar filme</h1>
+        <p className="mt-2 text-penumbra">Digite o nome de um filme no campo de busca lá em cima.</p>
       </div>
     );
   }
@@ -24,8 +24,8 @@ export default async function BuscarPage({ searchParams }: Props) {
   const firstPage = await searchMovies(q, 1);
 
   return (
-    <section>
-      <h1 className="mb-6 text-2xl font-bold">Resultados para &ldquo;{q}&rdquo;</h1>
+    <section className="shell page-top">
+      <h1 className="mb-6 font-display text-[2.25rem] leading-none font-extrabold text-balance md:text-5xl">Resultados para &ldquo;{q}&rdquo;</h1>
       <PaginatedMovieGrid
         key={q}
         initial={firstPage}

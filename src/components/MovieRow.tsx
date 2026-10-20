@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Movie } from "@/lib/tmdb/types";
+import { ChevronIcon } from "./Icons";
 import { MovieCard } from "./MovieCard";
+import { RowScroller } from "./RowScroller";
 
 type Props = { title: string; href: string; movies: Movie[] };
 
@@ -13,22 +15,27 @@ export function MovieRow({ title, href, movies }: Props) {
   const headingId = `fileira-${slug(title)}`;
 
   return (
-    <section aria-labelledby={headingId}>
-      <div className="mb-3 flex items-baseline justify-between">
-        <h2 id={headingId} className="text-lg font-semibold md:text-xl">
+    <section aria-labelledby={headingId} className="group/row">
+      <div className="shell flex items-baseline gap-4">
+        <h2 id={headingId} className="font-display text-[1.65rem] leading-none font-bold tracking-[0.01em] md:text-[2rem]">
           {title}
         </h2>
-        <Link href={href} aria-label={`Ver todos de ${title}`} className="text-sm text-zinc-400 hover:text-yellow-400">
-          ver tudo ›
+        <Link
+          href={href}
+          aria-label={`Ver todos de ${title}`}
+          className="inline-flex items-center gap-0.5 text-sm font-medium text-projetor/90 transition hover:text-projetor-claro focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-projetor md:text-tela/0 md:group-hover/row:text-projetor md:focus-visible:text-projetor"
+        >
+          Ver tudo
+          <ChevronIcon className="size-3.5" />
         </Link>
       </div>
-      <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:thin]">
+      <RowScroller label={title}>
         {movies.map((movie) => (
-          <li key={movie.id} className="w-36 shrink-0 snap-start md:w-44">
+          <li key={movie.id} className="w-[38vw] max-w-44 shrink-0 snap-start sm:w-40 md:w-44 md:max-w-none xl:w-48 2xl:w-52">
             <MovieCard movie={movie} />
           </li>
         ))}
-      </ul>
+      </RowScroller>
     </section>
   );
 }

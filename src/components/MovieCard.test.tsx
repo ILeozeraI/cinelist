@@ -9,7 +9,8 @@ describe("MovieCard", () => {
     expect(screen.getByRole("link")).toHaveAttribute("href", "/filme/693134");
     expect(screen.getByRole("img", { name: "Pôster de Duna: Parte Dois" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: "Duna: Parte Dois" })).toBeInTheDocument();
-    expect(screen.getByText("2024 · ★ 8.2")).toBeInTheDocument();
+    expect(screen.getByText("2024")).toBeInTheDocument();
+    expect(screen.getByText("8.2")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Netflix" })).toBeInTheDocument();
   });
 

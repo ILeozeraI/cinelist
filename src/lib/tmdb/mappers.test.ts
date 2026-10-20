@@ -46,12 +46,13 @@ describe("mapMovieDetails", () => {
   it("junta detalhes, streamings e trailer", () => {
     const d = mapMovieDetails(dunaDetails);
     expect(d.runtime).toBe(166);
+    expect(d.genres).toEqual(["Ficção científica", "Aventura"]);
     expect(d.overview).toBe("Paul Atreides se une a Chani e aos Fremen.");
     expect(d.trailer).toEqual({ key: "pt1", name: "Trailer" });
     expect(d.providers).toEqual([{ id: prime.provider_id, name: "Amazon Prime Video", logoPath: "/prime.jpg" }]);
   });
   it("duração zero, sinopse em branco, sem vídeos e sem streamings", () => {
     const d = mapMovieDetails({ ...semPoster, runtime: 0, overview: "   " });
-    expect(d).toMatchObject({ runtime: null, overview: "", trailer: null, providers: [] });
+    expect(d).toMatchObject({ runtime: null, overview: "", genres: [], trailer: null, providers: [] });
   });
 });

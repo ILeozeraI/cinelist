@@ -1,9 +1,89 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), "Arial Narrow", ui-sans-serif, sans-serif;
+}
+
+/* A paleta é a de uma sala de cinema: escuro em volta, a luz do projetor como destaque. */
+@theme {
+  --color-sala: #06070b;
+  --color-poltrona: #12141c;
+  --color-tela: #ecedf2;
+  --color-penumbra: #8e90a0;
+  --color-projetor: #f4b940;
+  --color-projetor-claro: #ffd27a;
 }
 
 :root {
   color-scheme: dark;
+  /* Margem lateral das páginas: cresce com a tela, como na Netflix. */
+  --gutter: clamp(1rem, 4vw, 4rem);
+  /* Espaço para o cabeçalho fixo nas páginas sem foto no topo. */
+  --page-top: 8.5rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --page-top: 7.5rem;
+  }
+}
+
+::selection {
+  background: var(--color-projetor);
+  color: var(--color-sala);
+}
+
+@utility shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1800px;
+  padding-inline: var(--gutter);
+}
+
+@utility page-top {
+  padding-top: var(--page-top);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Texto vazado (números do Top 10). */
+@utility text-outline {
+  color: var(--color-sala);
+  -webkit-text-stroke: 2px color-mix(in oklab, var(--color-tela) 60%, transparent);
+}
+
+@keyframes hero-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* A foto do destaque se aproxima devagar enquanto está na tela. */
+@keyframes slow-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

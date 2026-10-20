@@ -5,6 +5,7 @@ import { REVALIDATE, TmdbError, tmdbFetch, type TmdbParams } from "./client";
 import { mapBrFlatrate, mapMovie, mapMovieDetails, mapProvider } from "./mappers";
 import type {
   DiscoverFilters,
+  FeaturedMovie,
   Movie,
   MovieDetails,
   Page,
@@ -98,8 +99,24 @@ export async function getGenreRow(genreId: number): Promise<Movie[]> {
   return (await discoverMovies({ ...POPULAR, genreId })).items;
 }
 
-export async function getFeatured(): Promise<Movie | null> {
-  return (await discoverMovies(POPULAR)).items.find((m) => m.backdropPath !== null) ?? null;
+export const FEATURED_COUNT = 5;
+
+/** Os mais populares nos streamings agora, em ordem (alimenta o destaque e o Top 10). */
+export const getPopular = cache(async (): Promise<Movie[]> => (await discoverMovies(POPULAR)).items);
+
+/** Os primeiros populares com imagem de fundo, já com sinopse, duração e gêneros. */
+export async function getFeatured(): Promise<FeaturedMovie[]> {
+  const picks = (await getPopular())
+    .map((movie, i) => ({ movie, rank: i + 1 }))
+    .filter(({ movie }) => movie.backdropPath !== null)
+    .slice(0, FEATURED_COUNT);
+  const details = await Promise.all(
+    picks.map(async ({ movie, rank }) => {
+      const d = await getMovieDetails(movie.id).catch(() => null);
+      return d && d.backdropPath ? { ...d, rank } : null;
+    }),
+  );
+  return details.filter((d) => d !== null);
 }
 
 export async function searchMovies(query: string, startPage = 1): Promise<Page<Movie>> {

@@ -20,9 +20,9 @@ export function ProviderLogos({ providers, size = "sm", max = 4, className = "" 
         return (
           <li key={p.id}>
             {logo ? (
-              <Image src={logo} alt={p.name} title={p.name} width={px} height={px} className={size === "sm" ? "rounded" : "rounded-lg"} />
+              <Image src={logo} alt={p.name} title={p.name} width={px} height={px} className={size === "sm" ? "rounded shadow-sm shadow-black/60" : "rounded-lg ring-1 ring-white/10"} />
             ) : (
-              <span className="rounded bg-zinc-700 px-1 text-[10px]">{p.name}</span>
+              <span className="rounded bg-poltrona px-1 text-[10px]">{p.name}</span>
             )}
           </li>
         );

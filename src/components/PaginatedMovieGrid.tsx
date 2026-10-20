@@ -41,9 +41,9 @@ export function PaginatedMovieGrid({ initial, loadPage, emptyMessage }: Props) {
   return (
     <div className="space-y-6">
       {items.length > 0 && <MovieGrid movies={items} />}
-      {items.length === 0 && page >= totalPages && emptyMessage && <p className="text-zinc-400">{emptyMessage}</p>}
+      {items.length === 0 && page >= totalPages && emptyMessage && <p className="text-penumbra">{emptyMessage}</p>}
       {items.length === 0 && page < totalPages && (
-        <p className="text-zinc-400">
+        <p className="text-penumbra">
           Ainda não encontramos esse filme nos streamings. Carregue mais para continuar procurando.
         </p>
       )}
@@ -58,7 +58,7 @@ export function PaginatedMovieGrid({ initial, loadPage, emptyMessage }: Props) {
             type="button"
             onClick={loadMore}
             disabled={status === "loading"}
-            className="rounded-full border border-zinc-700 px-6 py-2 text-sm font-semibold hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-50"
+            className="rounded-md border border-white/15 bg-white/5 px-6 py-2.5 text-sm font-semibold transition hover:border-projetor hover:text-projetor disabled:opacity-50"
           >
             {status === "loading" ? "Carregando…" : "Carregar mais"}
           </button>

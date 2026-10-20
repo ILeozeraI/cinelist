@@ -30,9 +30,12 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient | nul
 export async function getCurrentUserId(supabase: SupabaseClient): Promise<string | null> {
   const { data, error } = await supabase.auth.getClaims();
   if (error) {
-    // Sem sessão é o caso normal de visitante anônimo.
-    if (error.name === "AuthSessionMissingError") return null;
-    throw error;
+    // Cookie estragado ou vencido (JWT inválido, refresh token velho) vale como anônimo.
+    // Só o que indica Supabase fora do ar (rede, status 0 ou 5xx) é relançado.
+    const status = (error as { status?: number }).status;
+    const foraDoAr = error.name === "AuthRetryableFetchError" || status === 0 || (status !== undefined && status >= 500);
+    if (foraDoAr) throw error;
+    return null;
   }
   return data?.claims.sub ?? null;
 }

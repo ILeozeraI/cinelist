@@ -15,14 +15,9 @@ const initialState: AuthFormState = { error: null, email: "" };
 
 export function AuthForm({ returnTo }: { returnTo: string }) {
   const [mode, setMode] = useState<Mode>("entrar");
-  const [state, formAction, pending] = useActionState(
-    mode === "entrar" ? signIn : signUp,
-    initialState,
-  );
-  const creating = mode === "criar";
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div className="flex gap-2">
         {(["entrar", "criar"] as const).map((value) => (
           <button
@@ -41,6 +36,21 @@ export function AuthForm({ returnTo }: { returnTo: string }) {
         ))}
       </div>
 
+      {/* key: cada modo tem o próprio estado; o erro de um não aparece no outro. */}
+      <ModeForm key={mode} mode={mode} returnTo={returnTo} />
+    </div>
+  );
+}
+
+function ModeForm({ mode, returnTo }: { mode: Mode; returnTo: string }) {
+  const [state, formAction, pending] = useActionState(
+    mode === "entrar" ? signIn : signUp,
+    initialState,
+  );
+  const creating = mode === "criar";
+
+  return (
+    <form action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="voltar" value={returnTo} />
 
       <label className="flex flex-col gap-1.5 text-sm font-semibold text-tela/90">

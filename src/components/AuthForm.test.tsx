@@ -69,6 +69,27 @@ describe("AuthForm", () => {
     );
   });
 
+  it("o erro do Entrar some ao trocar para Criar conta", async () => {
+    const user = userEvent.setup();
+    vi.mocked(signIn).mockResolvedValue({
+      error: "E-mail ou senha incorretos.",
+      email: "a@b.com",
+    });
+    render(<AuthForm returnTo="/" />);
+
+    await user.type(screen.getByLabelText("E-mail"), "a@b.com");
+    await user.type(screen.getByLabelText("Senha"), "errada1");
+    await user.click(submitButton());
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "E-mail ou senha incorretos.",
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Criar conta", pressed: false }),
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("envia o voltar escondido", () => {
     const { container } = render(<AuthForm returnTo="/filme/7" />);
     const hidden = container.querySelector(

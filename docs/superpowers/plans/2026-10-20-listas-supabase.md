@@ -120,7 +120,7 @@ Fronteiras (as mesmas da spec original): `src/lib/` não importa de `src/compone
   - `primary key (user_id, movie_id)` e índice `(user_id, status, updated_at desc)`
   - `alter table ... enable row level security`
   - Quatro políticas (`select`, `insert`, `update`, `delete`) `to authenticated`, com `using`/`with check` `((select auth.uid()) = user_id)`.
-- [ ] **Passo 2 (guiado): criar o projeto.** Em supabase.com/dashboard → *New project*: nome `cinelist`, uma senha forte do banco (guardar num lugar seguro; o app não usa) e região **South America (São Paulo)**. Espere o projeto ficar pronto.
+- [ ] **Passo 2: projeto já criado pelo dono.** É o projeto `cinelist`, na organização *CineList*, com "Enable Data API", "Automatically expose new tables" e "Enable automatic RLS" marcados. Pule a criação. O SQL continua ligando a RLS e criando as políticas explicitamente (sem políticas, a RLS automática bloquearia tudo).
 - [ ] **Passo 3 (guiado): chaves.** *Project Settings → API Keys*. O dono cria o `.env.local` a partir do `.env.example` (se já existir, acrescenta as linhas) e cola a **Project URL** e a **Publishable key**. Ele **não** cola nada no chat. Para conferir sem expor os valores, rode `grep -c "^NEXT_PUBLIC_SUPABASE_" .env.local`. Esperado: `2`.
 - [ ] **Passo 4 (guiado): desligar a confirmação.** *Authentication → Sign In / Providers → Email*: desligar **Confirm email** e salvar.
 - [ ] **Passo 5 (guiado): rodar o SQL.** *SQL Editor → New query*: o dono cola o conteúdo do arquivo de migração e clica em **Run**. Esperado: "Success. No rows returned". Para conferir, em *Table Editor* aparece `movie_marks` com o selo de RLS ligada.

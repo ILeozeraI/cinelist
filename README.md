@@ -36,9 +36,33 @@ npm run dev                  # http://localhost:3000
 
 O `npm run build` também precisa do token no `.env.local`, porque a página Início é gerada na hora do build.
 
+## Contas e listas (Supabase)
+
+Dá para criar uma conta (e-mail e senha) e montar duas listas: **Quero assistir** e **Já assisti**. As contas e as listas ficam no [Supabase](https://supabase.com) (gratuito). Sem as chaves do Supabase o site continua funcionando, só as partes de conta mostram "Não foi possível conectar agora".
+
+**Configurar o Supabase (uma vez):**
+
+1. Crie um projeto em https://supabase.com.
+2. Em *Authentication → Providers → Email*, deixe **Confirm email desligado** (assim a conta já entra logada, sem e-mail de confirmação).
+3. Em *SQL Editor*, cole o conteúdo do arquivo `supabase/migrations/20261020_movie_marks.sql` e clique em **Run**. Isso cria a tabela das marcações e as regras de segurança.
+4. Em *Project Settings → API*, copie a **URL do projeto** e a **chave pública** (a *publishable*, que começa com `sb_publishable_`). Nunca use a chave secreta (`service_role`).
+5. Cole as duas no `.env.local` (veja o `.env.example`):
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+```
+
+**Na Vercel** (*Settings → Environment Variables*, ambiente Production), cadastre:
+
+- `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, com os mesmos valores do `.env.local`;
+- `CRON_SECRET`, um texto aleatório e bem longo que só você sabe. Ele protege a rota `/api/manter-acordado`, que a Vercel chama todo dia (veja o `vercel.json`) para o Supabase gratuito não "dormir" por falta de uso.
+
+**Testes e2e:** eles usam o Supabase de verdade e criam usuários `e2e-…@cinelist.test`. Se quiser limpar, apague esses usuários em *Authentication → Users*.
+
 ## Publicação
 
-Na Vercel, cadastre `TMDB_API_READ_ACCESS_TOKEN` em Environment Variables antes do primeiro deploy.
+Na Vercel, cadastre `TMDB_API_READ_ACCESS_TOKEN` em Environment Variables antes do primeiro deploy (e as variáveis do Supabase, veja a seção acima).
 
 ## Scripts
 

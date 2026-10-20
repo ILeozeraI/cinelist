@@ -10,6 +10,8 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const MIN_PASSWORD = 6;
+// Limite do bcrypt, que o Supabase usa para guardar a senha.
+const MAX_PASSWORD = 72;
 const INVALID_EMAIL = "Digite um e-mail válido.";
 
 // Server Actions são endpoints públicos: valide tudo o que chega.
@@ -21,6 +23,17 @@ function readText(formData: FormData, name: string): string {
 function isEmail(email: string): boolean {
   const at = email.indexOf("@");
   return at > 0 && at < email.length - 1;
+}
+
+// Traduz o erro do Supabase; código sem tradução vai para o log para ganhar uma.
+function supabaseError(
+  error: { code?: string; status?: number },
+  email: string,
+): AuthFormState {
+  const message = authErrorMessage(error);
+  if (message === UNAVAILABLE_MESSAGE)
+    console.error("Erro do Supabase sem tradução", error.code, error.status);
+  return { error: message, email };
 }
 
 async function authenticate(
@@ -37,6 +50,11 @@ async function authenticate(
   }
   if (mode === "signIn" && !password)
     return { error: "Digite a senha.", email };
+  if (password.length > MAX_PASSWORD)
+    return {
+      error: `A senha pode ter no máximo ${MAX_PASSWORD} caracteres.`,
+      email,
+    };
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -47,10 +65,10 @@ async function authenticate(
         email,
         password,
       });
-      if (error) return { error: authErrorMessage(error), email };
+      if (error) return supabaseError(error, email);
     } else {
       const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) return { error: authErrorMessage(error), email };
+      if (error) return supabaseError(error, email);
       if (!data.session) {
         // Sem sessão = "Confirm email" ligado por engano no projeto do Supabase.
         console.error(
@@ -85,7 +103,8 @@ export async function signUp(
 export async function signOut(): Promise<void> {
   try {
     const supabase = await createSupabaseServerClient();
-    await supabase?.auth.signOut();
+    // "local": sai só deste aparelho; os outros continuam logados.
+    await supabase?.auth.signOut({ scope: "local" });
   } catch {
     // Os cookies são limpos de qualquer forma.
   }

@@ -22,7 +22,7 @@ const MESSAGES: Record<string, string> = {
   email_exists: "Este e-mail já tem uma conta. Use a opção Entrar.",
   weak_password: "A senha precisa ter pelo menos 6 caracteres.",
   email_address_invalid: "Digite um e-mail válido.",
-  validation_failed: "Digite um e-mail válido.",
+  validation_failed: "Confira o e-mail e a senha e tente de novo.",
   over_request_rate_limit:
     "Muitas tentativas. Espere um pouco e tente de novo.",
   over_email_send_rate_limit:

@@ -59,6 +59,7 @@ describe("AuthForm", () => {
       screen.getByRole("button", { name: "Criar conta", pressed: false }),
     );
     expect(screen.getByText("Mínimo de 6 caracteres")).toBeInTheDocument();
+    expect(screen.getByLabelText("Senha")).toHaveAttribute("maxlength", "72");
 
     await user.type(screen.getByLabelText("E-mail"), "a@b.com");
     await user.type(screen.getByLabelText("Senha"), "123456");

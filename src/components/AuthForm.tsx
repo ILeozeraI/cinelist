@@ -74,6 +74,7 @@ function ModeForm({ mode, returnTo }: { mode: Mode; returnTo: string }) {
             name="senha"
             required
             minLength={creating ? 6 : undefined}
+            maxLength={72}
             autoComplete={creating ? "new-password" : "current-password"}
             aria-describedby={creating ? "senha-regra" : undefined}
             className={`${inputClass} font-normal`}

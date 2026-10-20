@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Hero } from "@/components/Hero";
+import { HomeTabs } from "@/components/HomeTabs";
 import { HomeGenreRows, HomeGenreRowsFallback } from "@/components/HomeGenreRows";
 import { MovieRow } from "@/components/MovieRow";
 import { TopTenRow } from "@/components/TopTenRow";
@@ -31,6 +32,9 @@ export default async function HomePage() {
     <div className="relative isolate overflow-x-clip">
       {featured.length > 0 ? <Hero movies={featured} /> : <div className="page-top" />}
       <div className={`relative space-y-10 md:space-y-14 ${featured.length > 0 ? "-mt-8 md:-mt-36" : ""}`}>
+        <div className="shell">
+          <HomeTabs />
+        </div>
         <TopTenRow movies={popular} />
         {/* A nota é lida do link no navegador, assim a Início continua pronta e guardada no servidor. */}
         <Suspense fallback={<HomeGenreRowsFallback>{genreRows}</HomeGenreRowsFallback>}>

@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { MAX_PAGE } from "@/lib/filters";
 import { HOME_GENRES } from "@/lib/genres";
+import { dedupeMovieRows } from "@/lib/rows";
 import { REVALIDATE, TmdbError, tmdbFetch, type TmdbParams } from "./client";
 import { mapBrFlatrate, mapMovie, mapMovieDetails, mapProvider } from "./mappers";
 import type {
@@ -106,10 +107,8 @@ export async function getGenreRow(genreId: number, minRating: number | null = nu
 export async function getRatedGenreRows(minRating: number): Promise<GenreRow[]> {
   const results = await Promise.allSettled(HOME_GENRES.map((genre) => getGenreRow(genre.id, minRating)));
   if (results.every((r) => r.status === "rejected")) throw (results[0] as PromiseRejectedResult).reason;
-  return HOME_GENRES.flatMap((genre, i) => {
-    const result = results[i];
-    return result.status === "fulfilled" && result.value.length > 0 ? [{ genre, movies: result.value }] : [];
-  });
+  const unique = dedupeMovieRows(results.map((r) => (r.status === "fulfilled" ? r.value : [])));
+  return HOME_GENRES.flatMap((genre, i) => (unique[i].length > 0 ? [{ genre, movies: unique[i] }] : []));
 }
 
 export const FEATURED_COUNT = 5;

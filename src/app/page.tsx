@@ -5,6 +5,7 @@ import { HomeGenreRows, HomeGenreRowsFallback } from "@/components/HomeGenreRows
 import { MovieRow } from "@/components/MovieRow";
 import { TopTenRow } from "@/components/TopTenRow";
 import { HOME_GENRES } from "@/lib/genres";
+import { dedupeMovieRows } from "@/lib/rows";
 import { getFeatured, getGenreRow, getPopular } from "@/lib/tmdb/movies";
 
 // A Início é gerada no servidor e renovada a cada 6 horas.
@@ -21,12 +22,13 @@ export default async function HomePage() {
   }
   const featured = featuredResult.status === "fulfilled" ? featuredResult.value : [];
   const popular = popularResult.status === "fulfilled" ? popularResult.value : [];
-  const genreRows = HOME_GENRES.map((genre, i) => {
-    const result = rowResults[i];
-    return result.status === "fulfilled" ? (
-      <MovieRow key={genre.id} title={genre.name} href={`/explorar?genero=${genre.id}`} movies={result.value} />
-    ) : null;
-  });
+  // Um filme aparece só na primeira fileira em que entra; uma fileira que falhou ou ficou vazia some.
+  const uniqueRows = dedupeMovieRows(rowResults.map((r) => (r.status === "fulfilled" ? r.value : [])));
+  const genreRows = HOME_GENRES.map((genre, i) =>
+    uniqueRows[i].length > 0 ? (
+      <MovieRow key={genre.id} title={genre.name} href={`/explorar?genero=${genre.id}`} movies={uniqueRows[i]} />
+    ) : null,
+  );
 
   return (
     <div className="relative isolate overflow-x-clip">

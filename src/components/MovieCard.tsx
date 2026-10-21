@@ -36,7 +36,7 @@ export function MovieCard({ movie, eager = false }: { movie: Movie; eager?: bool
       <p className="mt-0.5 flex items-center gap-2.5 text-xs text-penumbra">
         <span>{movie.year ?? "—"}</span>
         {movie.rating > 0 && (
-          <span className="flex items-center gap-0.5 text-projetor/90">
+          <span title="Nota média do público no TMDB, de 0 a 10" className="flex items-center gap-0.5 text-projetor/90">
             <StarIcon className="size-3" />
             {formatRating(movie.rating)}
           </span>

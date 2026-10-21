@@ -10,7 +10,7 @@ export function MovieMeta({ rating, year, runtime, genres, className = "" }: Pro
   return (
     <ul aria-label="Informações" className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-tela/85 ${className}`}>
       {rating > 0 && (
-        <li className="flex items-center gap-1 font-semibold text-projetor">
+        <li title="Nota média do público no TMDB, de 0 a 10" className="flex items-center gap-1 font-semibold text-projetor">
           <StarIcon className="size-[1.05em]" />
           <span>
             <span className="sr-only">Nota </span>

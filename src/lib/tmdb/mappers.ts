@@ -11,8 +11,30 @@ export function mapProvider(p: TmdbProvider): Provider {
   return { id: p.provider_id, name: p.provider_name, logoPath: p.logo_path ?? null };
 }
 
+/** Tira do nome o que só diz o plano ou o canal: "Amazon Prime Video with Ads" vira "Amazon Prime Video". */
+const VARIANT_SUFFIX = /\s+(?:(?:Standard )?with Ads|Premium|(?:Amazon|Apple TV|Roku Premium|Claro)\s+Channel|Channel)$/i;
+
+export function serviceName(name: string): string {
+  return name.replace(VARIANT_SUFFIX, "").trim();
+}
+
+/** Um logo por serviço: o plano com anúncios ou o canal só aparece se o serviço principal não estiver na lista. */
+export function dedupeServices(providers: Provider[]): Provider[] {
+  const plain = providers.filter((p) => serviceName(p.name) === p.name);
+  const variants = providers.filter((p) => serviceName(p.name) !== p.name);
+  const seen = new Set<string>();
+  const kept = new Set<Provider>();
+  for (const p of [...plain, ...variants]) {
+    const key = serviceName(p.name).toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    kept.add(p);
+  }
+  return providers.filter((p) => kept.has(p));
+}
+
 export function mapBrFlatrate(wp: TmdbWatchProviders | undefined): Provider[] {
-  return (wp?.results?.BR?.flatrate ?? []).map(mapProvider);
+  return dedupeServices((wp?.results?.BR?.flatrate ?? []).map(mapProvider));
 }
 
 export function mapMovie(m: TmdbMovie, providers: Provider[] = []): Movie {

@@ -1,3 +1,5 @@
+<img width="1600" height="792" alt="cinelist-home" src="https://github.com/user-attachments/assets/8675f136-3070-41b5-a94f-8a3abe381982" />
+
 # CineList
 
 Catálogo para **descobrir o que assistir**: os filmes disponíveis agora nos streamings **por assinatura no Brasil** (Netflix, Prime Video, Max, Disney+, Globoplay…), com visual de vitrine e tema escuro.

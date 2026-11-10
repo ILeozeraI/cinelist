@@ -46,7 +46,7 @@ Dá para criar uma conta (e-mail e senha) e montar duas listas: **Quero assistir
 
 1. Crie um projeto em https://supabase.com.
 2. Em *Authentication → Providers → Email*, deixe **Confirm email desligado** (assim a conta já entra logada, sem e-mail de confirmação).
-3. Em *SQL Editor*, cole o conteúdo do arquivo `supabase/migrations/20261020_movie_marks.sql` e clique em **Run**. Isso cria a tabela das marcações e as regras de segurança.
+3. Em *SQL Editor*, cole o conteúdo do arquivo `supabase/migrations/20261020_movie_marks.sql` e clique em **Run**. Isso cria a tabela das marcações e as regras de segurança. Depois faça o mesmo com `supabase/migrations/20261110_manter_acordado.sql`, que cria a "batida do coração" diária (veja `CRON_SECRET` abaixo).
 4. Em *Project Settings → API*, copie a **URL do projeto** e a **chave pública** (a *publishable*, que começa com `sb_publishable_`). Nunca use a chave secreta (`service_role`).
 5. Cole as duas no `.env.local` (veja o `.env.example`):
 
@@ -58,7 +58,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 **Na Vercel** (*Settings → Environment Variables*, ambiente Production), cadastre:
 
 - `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, com os mesmos valores do `.env.local`;
-- `CRON_SECRET`, um texto aleatório e bem longo que só você sabe. Ele protege a rota `/api/manter-acordado`, que a Vercel chama todo dia (veja o `vercel.json`) para o Supabase gratuito não "dormir" por falta de uso.
+- `CRON_SECRET`, um texto aleatório e bem longo que só você sabe. Ele protege a rota `/api/manter-acordado`, que a Vercel chama todo dia (veja o `vercel.json`) para o Supabase gratuito não "dormir" por falta de uso. A cada chamada ela grava a hora na tabela `keepalive`: em *Table Editor → keepalive* dá para ver a última batida (`last_ping`) e quantas já houve (`pings`).
 
 **Testes e2e:** eles usam o Supabase de verdade e criam usuários `e2e-…@cinelist.test`. Se quiser limpar, apague esses usuários em *Authentication → Users*.
 

@@ -11,7 +11,8 @@ function segredoConfere(recebido: string, esperado: string): boolean {
   return timingSafeEqual(a, b);
 }
 
-// Chamada uma vez por dia pelo Vercel Cron: uma consulta leve para o Supabase gratuito não pausar.
+// Chamada uma vez por dia pelo Vercel Cron para o Supabase gratuito não pausar.
+// Só uma contagem (HEAD) que voltava 0 linhas não bastou: agora grava no banco e ainda faz uma leitura.
 export async function GET(request: Request): Promise<Response> {
   const segredo = process.env.CRON_SECRET;
   const auth = request.headers.get("authorization") ?? "";
@@ -23,10 +24,16 @@ export async function GET(request: Request): Promise<Response> {
   if (!env) return Response.json({ ok: false }, { status: 503 });
 
   const supabase = createClient(env.url, env.key, { auth: { persistSession: false } });
-  // A RLS devolve 0 linhas para anon, mas a consulta chega ao banco.
-  const { error } = await supabase.from("movie_marks").select("movie_id", { count: "exact", head: true });
-  if (error) {
-    console.error("manter-acordado: consulta ao Supabase falhou", error);
+  // Escrita: atualiza a tabela keepalive (supabase/migrations/20261110_manter_acordado.sql).
+  const escrita = await supabase.rpc("manter_acordado");
+  if (escrita.error) {
+    console.error("manter-acordado: gravação no Supabase falhou", escrita.error);
+    return Response.json({ ok: false }, { status: 503 });
+  }
+  // Leitura: a RLS devolve 0 linhas para anon, mas a consulta chega ao banco.
+  const leitura = await supabase.from("movie_marks").select("movie_id", { count: "exact", head: true });
+  if (leitura.error) {
+    console.error("manter-acordado: consulta ao Supabase falhou", leitura.error);
     return Response.json({ ok: false }, { status: 503 });
   }
   return Response.json({ ok: true });
